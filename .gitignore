@@ -88,7 +88,7 @@ local_settings.py
 site_project/site_project/.env
 *.env
 db.sqlite3
-site_project/site_project/postgresql.sql
+site_project/site_project/postgresql.txt
 
 venv/
 site_project/media/
