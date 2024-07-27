@@ -16,5 +16,6 @@
         </p>
         {{ post.body|truncatewords:30|linebreaks }}
     {% endfor %}
-    {% include "pagination.html" with page=posts %}
+    {% comment %} {% include "pagination.html" with page=posts %} {% endcomment %}
+    {% include "pagination.html" with page=page_obj %} {% comment %}типовое представление ListView передает запрошенную страницу в переменную page_obj{% endcomment %}
 {% endblock %}
