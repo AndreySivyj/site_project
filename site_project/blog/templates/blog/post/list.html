@@ -1,4 +1,5 @@
 {% extends "blog/base.html" %}
+{% load blog_tags %}
 
 {% block title %}My Blog{% endblock %}
 
@@ -11,7 +12,7 @@
 
     {% for post in posts %}
         <h2>
-            {% comment %} <a href="{% url 'blog:post_detail' post.id %}"> {% endcomment %}
+            {% comment %} <a href="{% url "blog:post_detail" post.id %}"> {% endcomment %}
             <a href="{{ post.get_absolute_url }}">    
                 {{ post.title }}
             </a>
@@ -20,7 +21,7 @@
         <p class="tags">
             Tags:
             {% for tag in post.tags.all %}
-                <a href="{% url 'blog:post_list_by_tag' tag.slug %}">
+                <a href="{% url "blog:post_list_by_tag" tag.slug %}">
                     {{ tag.name }}
                 </a>
                 {% if not forloop.last %}, {% endif %}
@@ -30,7 +31,8 @@
         <p class="date">
             Published {{ post.publish }} by {{ post.author }}
         </p>
-        {{ post.body|truncatewords:30|linebreaks }}
+        {% comment %} {{ post.body|truncatewords:30|linebreaks }} {% endcomment %}
+        {{ post.body|markdown|truncatewords_html:30 }}
     {% endfor %}
     {% include "pagination.html" with page=posts %} 
     {% comment %} {% include "pagination.html" with page=page_obj %} {% endcomment %}{% comment %}типовое представление ListView передает запрошенную страницу в переменную page_obj{% endcomment %}
