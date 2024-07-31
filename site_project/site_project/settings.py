@@ -29,6 +29,7 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = [config("HOST_IP"), '127.0.0.1']
 
+SITE_ID = 1
 
 # Application definition
 
@@ -43,6 +44,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'blog.apps.BlogConfig',
     'taggit',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
 ]
 
 MIDDLEWARE = [
