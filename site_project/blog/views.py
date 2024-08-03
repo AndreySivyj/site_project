@@ -3,11 +3,13 @@ from django.http import Http404
 from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from .forms import EmailPostForm, CommentForm
+from .forms import EmailPostForm, CommentForm, SearchForm
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.contrib.postgres.search import TrigramSimilarity
 
 
 def post_list(request, tag_slug=None):
@@ -115,3 +117,47 @@ def post_comment(request, post_id):
         # Сохранить комментарий в базе данных
         comment.save()
     return render(request, 'blog/post/comment.html', {'post': post, 'form': form, 'comment': comment})
+
+
+# def post_search(request):
+#     form = SearchForm()
+#     query = None
+#     results = []
+
+#     if 'query' in request.GET:
+#         form = SearchForm(request.GET)
+#         if form.is_valid():
+#             query = form.cleaned_data['query']
+#             # search_vector = SearchVector('title', 'body')
+#             search_vector = SearchVector('title', weight='A') + SearchVector('body', weight='B') # используем взвешивание, чтобы придавать бóльшую релевантность постам, 
+#                                                                                                  # которые сочетаются по заголовку, а не по содержимому
+#                                                                                         # Вес 1.0 применяется к вектору поиска title (A), и вес 0.4 – к вектору body (B)
+#             search_query = SearchQuery(query)
+#             # results = Post.published.annotate(search=SearchVector('title', 'body'),).filter(search=query)
+#             # results = Post.published.annotate(search=search_vector,rank=SearchRank(search_vector, search_query)).filter(search=search_query).order_by('-rank')
+#             results = Post.published.annotate(search=search_vector,rank=SearchRank(search_vector, search_query)).filter(rank__gte=0.3).order_by('-rank') # используем взвешивание
+#                                                                                                 # Результаты фильтруются, чтобы отображать только те, у которых ранг выше 0.3.
+            
+#     return render(request,
+#                 'blog/post/search.html',
+#                 {'form': form,
+#                 'query': query,
+#                 'results': results})
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            # Поиск по триграммному сходству (сначала к БД выполняем запрос - CREATE EXTENSION pg_trgm;)
+            results = Post.published.annotate(similarity=TrigramSimilarity('title', query),).filter(similarity__gt=0.1).order_by('-similarity')
+            
+    return render(request,
+                'blog/post/search.html',
+                {'form': form,
+                'query': query,
+                'results': results})
