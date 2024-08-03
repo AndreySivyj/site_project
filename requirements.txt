@@ -5,6 +5,7 @@ django-taggit==5.0.1
 importlib-metadata==8.2.0
 Markdown==3.6
 psycopg2==2.9.9
+psycopg2-binary==2.9.9
 python-decouple==3.8
 sqlparse==0.5.1
 typing-extensions==4.12.2
